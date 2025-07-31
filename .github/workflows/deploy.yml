@@ -56,7 +56,6 @@ jobs:
             sudo yum update -y
             sudo yum install -y docker
             sudo service docker start
-            sudo usermod -aG docker ec2-user
 
             aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -64,21 +63,21 @@ jobs:
             aws configure set region ${{ secrets.AWS_REGION }}
 
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
-              | docker login --username AWS --password-stdin $(echo "${{ secrets.ECR_WEB_REPO }}" | cut -d'/' -f1)
+              | sudo docker login --username AWS --password-stdin $(echo "${{ secrets.ECR_WEB_REPO }}" | cut -d'/' -f1)
 
             # Stop and remove existing containers
-            docker stop clo835-app clo835-mysql || true
-            docker rm clo835-app clo835-mysql || true
+            sudo docker stop clo835-app clo835-mysql || true
+            sudo docker rm clo835-app clo835-mysql || true
 
             # Create a network for both containers
-            docker network create clo835-net || true
+            sudo docker network create clo835-net || true
 
             # Pull latest images
-            docker pull ${{ secrets.ECR_WEB_REPO }}:latest
-            docker pull ${{ secrets.ECR_MYSQL_REPO }}:latest
+            sudo docker pull ${{ secrets.ECR_WEB_REPO }}:latest
+            sudo docker pull ${{ secrets.ECR_MYSQL_REPO }}:latest
 
             # Run MySQL container
-            docker run -d \
+            sudo docker run -d \
               --name clo835-mysql \
               --network clo835-net \
               -e MYSQL_ROOT_PASSWORD=admin123 \
@@ -90,7 +89,7 @@ jobs:
             sleep 25
 
             # Run Web App container using MySQL container name as DBHOST
-            docker run -d \
+            sudo docker run -d \
               --name clo835-app \
               --network clo835-net \
               -p 8080:8080 \

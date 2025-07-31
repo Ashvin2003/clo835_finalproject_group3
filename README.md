@@ -1,41 +1,97 @@
-# Install the required MySQL package
+# CLO835 Terraform Infrastructure Deployment
 
-sudo apt-get update -y
-sudo apt-get install mysql-client -y
+This repository provisions AWS infrastructure for the CLO835 project and deploys Dockerized web and database containers to EC2 using Terraform and GitHub Actions. The project is done by Group 3 and the members are:
 
-# Running application locally
-pip3 install -r requirements.txt
-sudo python3 app.py
-# Building and running 2 tier web application locally
-### Building mysql docker image 
-```docker build -t my_db -f Dockerfile_mysql . ```
+- Ashvin Ravi
+- Wanigamuni Senindu Kithmal Mendis
+- Jasleen Kour Dhir
 
-### Building application docker image 
-```docker build -t my_app -f Dockerfile . ```
+---
 
-### Running mysql
-```docker run -d -e MYSQL_ROOT_PASSWORD=pw  my_db```
-
-
-### Get the IP of the database and export it as DBHOST variable
-```docker inspect <container_id>```
-
-
-### Example when running DB runs as a docker container and app is running locally
+## 📂 Clone the Repository
+```bash
+git clone <your-repo-url>
+cd clo835-ashvinravi-terraformcode
 ```
-export DBHOST=127.0.0.1
-export DBPORT=3307
+
+---
+
+## 🔑 Generate SSH Keys
+Create SSH keys for EC2 access inside the `instances` directory:
+```bash
+cd instances
+ssh-keygen -t rsa -b 2048 -f clo835_key
 ```
-### Example when running DB runs as a docker container and app is running locally
+
+---
+
+## 🛠️ Install Terraform
+Run the following commands to install Terraform on Amazon Linux 2:
+```bash
+sudo yum update -y
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum install -y terraform
+terraform -version
 ```
-export DBHOST=172.17.0.2
-export DBPORT=3306
+
+---
+
+## 🌐 Deploy Networking Module
+Initialize and apply the networking resources:
+```bash
+cd networking
+terraform init
+terraform validate
+terraform plan
+terraform apply
 ```
+
+---
+
+## 💻 Deploy Instances Module
+Initialize and apply the EC2 instances and related resources:
+```bash
+cd instances
+terraform init
+terraform validate
+terraform plan
+terraform apply
 ```
-export DBUSER=root
-export DATABASE=employees
-export DBPWD=pw
-export APP_COLOR=blue
+
+---
+
+## ✅ Verify AWS Resources
+After applying both modules, confirm that the VPC, subnets, security groups, and EC2 instances have been created in the AWS Management Console.
+
+---
+
+## 🔐 Configure GitHub Secrets
+Update the repository secrets to match your active AWS session and infrastructure:
+
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- AWS_SESSION_TOKEN
+- AWS_ACCOUNT_ID
+- EC2_PUBLIC_DNS
+- EC2_PUBLIC_IP
+- ECR_MYSQL_REPO (URI of the MySQL ECR repo)
+- ECR_WEB_REPO (URI of the Web App ECR repo)
+- SSH_PRIVATE_KEY (contents of clo835_key)
+
+---
+
+## 🚀 Run the GitHub Action
+Trigger the **Build, Push to ECR, Deploy to EC2** workflow from the **Actions** tab in GitHub.
+
+---
+
+## 🔍 Expected Outcome
+- The GitHub Action will build Docker images, push them to ECR, and deploy containers to EC2.
+- For unit testing, access the web application in a browser at:
+
 ```
-### Run the application, make sure it is visible in the browser
-```docker run -p 8080:8080  -e DBHOST=$DBHOST -e DBPORT=$DBPORT -e  DBUSER=$DBUSER -e DBPWD=$DBPWD  my_app```
+http://<EC2_PUBLIC_IP>:8080
+```
+
+📌 **Note:** Port `8080` is the port exposed by the web application container.

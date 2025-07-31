@@ -25,6 +25,11 @@ BACKGROUND_IMAGE_URL = os.environ.get("BACKGROUND_IMAGE_URL") or ""
 USER_NAME = os.environ.get("USER_NAME") or "Senindu Mendis"
 AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
 
+# AWS credentials from environment variables
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_SESSION_TOKEN = os.environ.get("AWS_SESSION_TOKEN")
+
 # Create a connection to the MySQL database
 db_conn = connections.Connection(
     host=DBHOST,
@@ -52,8 +57,18 @@ def download_background_image():
         
         logger.info(f"Downloading background image from S3: {BACKGROUND_IMAGE_URL}")
         
-        # Create S3 client
-        s3_client = boto3.client('s3', region_name=AWS_REGION)
+        # Create S3 client with explicit credentials
+        if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+            s3_client = boto3.client(
+                's3',
+                region_name=AWS_REGION,
+                aws_access_key_id=AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+                aws_session_token=AWS_SESSION_TOKEN if AWS_SESSION_TOKEN else None
+            )
+        else:
+            # Fallback to default credential chain (for local development)
+            s3_client = boto3.client('s3', region_name=AWS_REGION)
         
         # Download the image
         local_path = "/app/static/images/background.jpg"

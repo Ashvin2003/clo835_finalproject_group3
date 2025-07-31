@@ -52,7 +52,7 @@ jobs:
 
       - name: SSH into EC2 and Deploy Containers
         run: |
-          ssh -tt -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_PUBLIC_DNS }} << EOF
+          ssh -tt -o StrictHostKeyChecking=no -o ServerAliveInterval=60 ${{ secrets.EC2_USER }}@${{ secrets.EC2_PUBLIC_DNS }} << EOF
             sudo yum update -y
             sudo yum install -y docker
             sudo service docker start
@@ -99,4 +99,10 @@ jobs:
               -e DATABASE=employees \
               -e DBPORT=3306 \
               ${{ secrets.ECR_WEB_REPO }}:latest
+
+            # Debugging: check running containers and logs
+            sudo docker ps -a
+            sudo docker logs clo835-app || true
+
+            exit
           EOF

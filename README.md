@@ -10,7 +10,7 @@ This repository provisions AWS infrastructure for the CLO835 project and deploys
 
 ## 📂 Clone the Repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Ashvin2003/clo835-ashvinravi-terraformcode.git
 cd clo835-ashvinravi-terraformcode
 ```
 

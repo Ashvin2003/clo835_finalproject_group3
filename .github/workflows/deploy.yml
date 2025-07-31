@@ -1,0 +1,103 @@
+name: Build, Push to ECR, Deploy to EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Images to ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and Push Web App Image
+        run: |
+          docker build -t web-app:latest -f Dockerfile .
+          docker tag web-app:latest ${{ secrets.ECR_WEB_REPO }}:latest
+          docker push ${{ secrets.ECR_WEB_REPO }}:latest
+
+      - name: Build and Push MySQL Image
+        run: |
+          docker build -t mysql-db:latest -f Dockerfile_mysql .
+          docker tag mysql-db:latest ${{ secrets.ECR_MYSQL_REPO }}:latest
+          docker push ${{ secrets.ECR_MYSQL_REPO }}:latest
+
+  deploy-to-ec2:
+    name: Deploy Docker Containers to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Setup SSH Access
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_PUBLIC_DNS }} >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
+      - name: SSH into EC2 and Deploy Containers
+        run: |
+          ssh -tt -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_PUBLIC_DNS }} << EOF
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo service docker start
+            sudo usermod -aG docker ec2-user
+
+            aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws configure set aws_session_token ${{ secrets.AWS_SESSION_TOKEN }}
+            aws configure set region ${{ secrets.AWS_REGION }}
+
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+              | docker login --username AWS --password-stdin $(echo "${{ secrets.ECR_WEB_REPO }}" | cut -d'/' -f1)
+
+            # Stop and remove existing containers
+            docker stop clo835-app clo835-mysql || true
+            docker rm clo835-app clo835-mysql || true
+
+            # Create a network for both containers
+            docker network create clo835-net || true
+
+            # Pull latest images
+            docker pull ${{ secrets.ECR_WEB_REPO }}:latest
+            docker pull ${{ secrets.ECR_MYSQL_REPO }}:latest
+
+            # Run MySQL container
+            docker run -d \
+              --name clo835-mysql \
+              --network clo835-net \
+              -e MYSQL_ROOT_PASSWORD=admin123 \
+              -e MYSQL_DATABASE=employees \
+              -p 3306:3306 \
+              ${{ secrets.ECR_MYSQL_REPO }}:latest
+
+            echo "Waiting for MySQL to initialize..."
+            sleep 25
+
+            # Run Web App container using MySQL container name as DBHOST
+            docker run -d \
+              --name clo835-app \
+              --network clo835-net \
+              -p 8080:8080 \
+              -e DBHOST=clo835-mysql \
+              -e DBUSER=root \
+              -e DBPWD=admin123 \
+              -e DATABASE=employees \
+              -e DBPORT=3306 \
+              ${{ secrets.ECR_WEB_REPO }}:latest
+          EOF

@@ -1,20 +1,44 @@
-<!doctype html>
-<title>Hello from Flask</title>
-<body style="background: {{ color }};"></body>
-<div style="color: #e4e4e4;
-    text-align:  center;
-    height: 90px;
-    vertical-align:  middle;">
-{% if name %}
-  <h1>Hello from {{ name }}!</h1>
-{% else %}
-  <h1>Hello From CLO835!</h1>
-{% endif %}
-
-  {% if contents %}
-  <textarea rows="10" cols="50">
-    {{ contents }}
-  </textarea>
-  {% endif %}
-
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>About Us</title>
+	<style>
+		body {
+			background-image: url('{{ background_image }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			font-family: 'Avenir', Arial, sans-serif;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+		}
+		.container {
+			background-color: rgba(0,0,0,0.7);
+			padding: 20px;
+			border-radius: 10px;
+			margin: 20px auto;
+			max-width: 600px;
+		}
+		a {
+			color: #fff;
+			text-decoration: none;
+			font-size: 16px;
+		}
+		a:hover {
+			text-decoration: underline;
+		}
+	</style>
+</head>
+<body>
+	<center>
+		<div class="container">
+			<h1 style="color: DodgerBlue">About Us - {{ user_name }}</h1>
+			<p>This is a Flask application for employee management.</p>
+			<p>Developed by {{ user_name }} for CLO835 Assignment 2.</p>
+			<br><br>
+			<a href="/">Back to Home</a>
+		</div>
+	</center>
+</body>
+</html>

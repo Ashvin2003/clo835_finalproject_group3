@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-app-deployment
+  namespace: final
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-app
+  template:
+    metadata:
+      labels:
+        app: flask-app
+    spec:
+      serviceAccountName: clo835
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: flask-app
+        image: YOUR_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/clo835-app:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 81
+        env:
+        - name: DBHOST
+          value: "mysql-service"
+        - name: DBPORT
+          value: "3306"
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-user
+        - name: DBPWD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        - name: DATABASE
+          value: "employees"
+        - name: BACKGROUND_IMAGE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: BACKGROUND_IMAGE_URL
+        - name: USER_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: USER_NAME
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: AWS_REGION

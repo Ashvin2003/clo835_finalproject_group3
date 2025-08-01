@@ -16,6 +16,6 @@ data:
         location VARCHAR(100)
     );
     
-    INSERT INTO employee VALUES (1, 'John', 'Doe', 'Python', 'Toronto');
-    INSERT INTO employee VALUES (2, 'Jane', 'Smith', 'Java', 'Vancouver');
-    INSERT INTO employee VALUES (3, 'Bob', 'Johnson', 'JavaScript', 'Montreal'); 
+    INSERT INTO employee VALUES (1, 'Senindu', 'Mendis', 'Python', 'Toronto');
+    INSERT INTO employee VALUES (2, 'Ashvin', 'Ravi', 'Terraform', 'Toronto');
+    INSERT INTO employee VALUES (3, 'Jasleen', 'Dhir', 'Node.js', 'Toronto'); 

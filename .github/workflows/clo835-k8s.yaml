@@ -1,0 +1,66 @@
+#CLO835-FinalProject-Group3-Senindu, Ashvin and Jasleen
+
+name: K8s Cluster deployment by Group 3
+on: 
+  push:
+    branches: [ master ]
+
+jobs:
+  
+  build:
+    
+    name: Build Image
+    runs-on: ubuntu-latest
+   
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+        AWS_REGION: us-east-1
+
+    - name: Build and push app tier image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_APP: flask-app
+        IMAGE_TAG: latest
+      run: |
+        
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_APP:$IMAGE_TAG .
+        # Push Python App to AWS ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_APP:$IMAGE_TAG
+
+  # deploy:
+  #   name: Deploy to K8s Cluster
+  #   env:
+  #       AWS_REGION: us-east-1
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   strategy:
+  #     fail-fast: true  # Cancels workflow if a step fails
+  #   steps:  
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+  #         aws-region: ${{ env.AWS_REGION }}
+
+  #     - name: Rollout K8s Cluster
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.EC2_HOST }}
+  #         username: ${{ secrets.EC2_USER }}
+  #         key: ${{ secrets.EC2_SSH_KEY }}
+  #         script: |
+  #           set -e  
+  #           chmod +x ~/deploy.sh
+  #           ~/deploy.sh

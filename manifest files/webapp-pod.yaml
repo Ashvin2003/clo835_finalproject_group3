@@ -1,0 +1,32 @@
+#this is pod file
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp-pod
+  namespace: webapp-ns
+  labels:
+    app: employees
+spec:
+  containers:
+  - name: webapp
+    image: 339712725685.dkr.ecr.us-east-1.amazonaws.com/clo835-webapp:app5
+    ports:
+      - containerPort: 80
+    env:
+      - name: DBHOST
+        value: "mysql-service.mysql-ns.svc.cluster.local"
+      - name: DBPORT
+        value: "3306"
+      - name: DBUSER
+        value: "root"
+      - name: DBPWD
+        valueFrom:
+          secretKeyRef:
+            name: mysql-password-secret
+            key: DBPWD
+      - name: DATABASE
+        value: "employees"
+      - name: APP_COLOR
+        value: "lime"
+  imagePullSecrets:
+  - name: ecr-registry-secret

@@ -1,3 +1,6 @@
+
+Add MySQL deployment manifest with secret-based password and ECR image
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:

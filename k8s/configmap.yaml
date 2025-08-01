@@ -6,4 +6,8 @@ metadata:
 data:
   BACKGROUND_IMAGE_URL: "s3://clo835-final-group3/background.jpg"
   USER_NAME: "Group 3"
-  AWS_REGION: "us-east-1" 
+  AWS_REGION: "us-east-1"
+  # AWS credentials (replace with your actual values)
+  AWS_ACCESS_KEY_ID: "YOUR_ACCESS_KEY_ID"
+  AWS_SECRET_ACCESS_KEY: "YOUR_SECRET_ACCESS_KEY"
+  AWS_SESSION_TOKEN: "YOUR_SESSION_TOKEN" 

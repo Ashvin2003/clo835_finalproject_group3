@@ -18,7 +18,7 @@ spec:
       - name: regcred
       containers:
       - name: flask-app
-        image: YOUR_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/clo835-app:latest
+        image: YOUR_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/final/flask-app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 81
@@ -54,3 +54,18 @@ spec:
             configMapKeyRef:
               name: app-config
               key: AWS_REGION
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_SESSION_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: AWS_SESSION_TOKEN

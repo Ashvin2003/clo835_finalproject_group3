@@ -1,97 +1,269 @@
-# CLO835 Terraform Infrastructure Deployment
+# CLO835 Final - Group 3 - Enhanced Flask App with S3 Background Images
 
-This repository provisions AWS infrastructure for the CLO835 project and deploys Dockerized web and database containers to EC2 using Terraform and GitHub Actions. The project is done by Group 3 and the members are:
+This project is an enhanced Flask web application with MySQL database that supports background images from S3, Kubernetes deployment with IRSA, and CI/CD pipeline.
 
-- Ashvin Ravi
-- Wanigamuni Senindu Kithmal Mendis
-- Jasleen Kour Dhir
+## 🚀 Enhanced Features
 
----
+- **Background Images from S3**: Application retrieves background images from private S3 bucket
+- **ConfigMap Integration**: Background image URL, user name, aws access keys  provided via ConfigMap
+- **Kubernetes Secrets**: MySQL credentials stored securely as Kubernetes secrets
+- **IRSA Support**: Service account with IAM roles
+- **Port 81**: Application listens on port 81 as requested
+- **Comprehensive Logging**: Background image URL and application events logged
+- **Modern UI**: Responsive design with background images instead of solid colors
+- **CI/CD Pipeline**: GitHub Actions for automated testing and ECR deployment
 
-## 📂 Clone the Repository
+## 🏗️ Project Structure
+
+```
+├── app.py                          # Enhanced Flask application
+├── requirements.txt                 # Python dependencies
+├── Dockerfile                      # Container configuration
+├── templates/                      # HTML templates with background images
+├── k8s/                           # Kubernetes manifests
+│   ├── namespace.yaml             # Final namespace
+│   ├── configmap.yaml            # App configuration
+│   ├── secret.yaml               # Database credentials
+│   ├── pvc.yaml                  # Persistent volume claim
+│   ├── serviceaccount.yaml       # IRSA service account
+│   ├── role.yaml                 # RBAC roles
+│   ├── db/                       # Database manifests
+│   │   ├── deployment.yaml      # MySQL deployment
+│   │   ├── service.yaml         # MySQL service
+│   │   └── init-configmap.yaml  # Database initialization
+│   └── app/                      # Application manifests
+│       ├── deployment.yaml       # Flask app deployment
+│       └── service.yaml         # LoadBalancer service
+├── .github/workflows/             # CI/CD pipeline
+    └── ci-cd.yml                # GitHub Actions workflow
+
+```
+
+## 🐳 Local Development
+
+### 1. Build Docker Images
+
 ```bash
-git clone https://github.com/Ashvin2003/clo835-ashvinravi-terraformcode.git
-cd clo835-ashvinravi-terraformcode
+# Build application image
+docker build -t clo835-app .
+
+# Build database image
+docker build -t clo835-db -f db/Dockerfile .
 ```
 
----
+### 2. Test Locally
 
-## 🔑 Generate SSH Keys
-Create SSH keys for EC2 access inside the `instances` directory:
 ```bash
-cd instances
-ssh-keygen -t rsa -b 2048 -f clo835_key
+# Create network
+docker network create clo835-network
+
+# Run MySQL database
+docker run -d -p 3306:3306 \
+  --network=clo835-network \
+  -e MYSQL_ROOT_PASSWORD=password123 \
+  --name=clo835-db clo835-db
+
+# Run Flask application
+docker run -d -p 8081:81 \
+  --network=clo835-network \
+  -e DBHOST=clo835-db \
+  -e DBPORT=3306 \
+  -e DBUSER=root \
+  -e DBPWD=password123 \
+  -e DATABASE=employees \
+  -e BACKGROUND_IMAGE_URL=s3://your-bucket/background.jpg \
+  -e USER_NAME="Senindu Mendis" \
+  -e AWS_REGION=us-east-1 \
+  --name=clo835-app clo835-app
 ```
 
----
+## ☁️ AWS Setup
 
-## 🛠️ Install Terraform
-Run the following commands to install Terraform on Amazon Linux 2:
+### 1. Create S3 Bucket
+
 ```bash
-sudo yum update -y
-sudo yum install -y yum-utils
-sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
-sudo yum install -y terraform
-terraform -version
+aws s3 mb s3://your-private-bucket
+aws s3 cp background.jpg s3://your-private-bucket/
 ```
 
----
+### 2. Create ECR Repository
 
-## 🌐 Deploy Networking Module
-Initialize and apply the networking resources:
 ```bash
-cd networking
-terraform init
-terraform validate
-terraform plan
-terraform apply
+aws ecr create-repository --repository-name clo835-app
 ```
 
----
+### 3. Create IAM Role for IRSA
 
-## 💻 Deploy Instances Module
-Initialize and apply the EC2 instances and related resources:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::your-private-bucket",
+                "arn:aws:s3:::your-private-bucket/*"
+            ]
+        }
+    ]
+}
+```
+
+### 4. Create EKS Cluster
+
 ```bash
-cd instances
-terraform init
-terraform validate
-terraform plan
-terraform apply
+eksctl create cluster \
+  --name clo835-cluster \
+  --region us-east-1 \
+  --nodegroup-name standard-workers \
+  --node-type t3.medium \
+  --nodes 2 \
+  --nodes-min 2 \
+  --nodes-max 4 \
+  --managed
 ```
 
----
+## 🚀 Kubernetes Deployment
 
-## ✅ Verify AWS Resources
-After applying both modules, confirm that the VPC, subnets, security groups, and EC2 instances have been created in the AWS Management Console.
+### 1. Create Namespace and Resources
 
----
-
-## 🔐 Configure GitHub Secrets
-Update the repository secrets to match your active AWS session and infrastructure:
-
-- AWS_ACCESS_KEY_ID
-- AWS_SECRET_ACCESS_KEY
-- AWS_SESSION_TOKEN
-- AWS_ACCOUNT_ID
-- EC2_PUBLIC_DNS
-- EC2_PUBLIC_IP
-- ECR_MYSQL_REPO (URI of the MySQL ECR repo)
-- ECR_WEB_REPO (URI of the Web App ECR repo)
-- SSH_PRIVATE_KEY (contents of clo835_key)
-
----
-
-## 🚀 Run the GitHub Action
-Trigger the **Build, Push to ECR, Deploy to EC2** workflow from the **Actions** tab in GitHub.
-
----
-
-## 🔍 Expected Outcome
-- The GitHub Action will build Docker images, push them to ECR, and deploy containers to EC2.
-- For unit testing, access the web application in a browser at:
-
-```
-http://<EC2_PUBLIC_IP>:8080
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secret.yaml
+kubectl apply -f k8s/pvc.yaml
+kubectl apply -f k8s/serviceaccount.yaml
+kubectl apply -f k8s/role.yaml
 ```
 
-📌 **Note:** Port `8080` is the port exposed by the web application container.
+### 2. Deploy Database
+
+```bash
+kubectl apply -f k8s/db/init-configmap.yaml
+kubectl apply -f k8s/db/deployment.yaml
+kubectl apply -f k8s/db/service.yaml
+```
+
+### 3. Deploy Application
+
+```bash
+kubectl apply -f k8s/app/deployment.yaml
+kubectl apply -f k8s/app/service.yaml
+```
+
+### 4. Verify Deployment
+
+```bash
+kubectl get all -n final
+kubectl get svc flask-app-service -n final
+```
+
+## 🔄 CI/CD Pipeline
+
+### 1. GitHub Repository Setup
+
+1. Push code to GitHub repository
+2. Add AWS credentials as GitHub secrets:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+
+### 2. Automated Pipeline
+
+The GitHub Actions workflow will:
+1. Run unit tests
+2. Build Docker image
+3. Push to Amazon ECR
+4. Deploy to Kubernetes (optional)
+
+## 🔧 Configuration
+
+### Environment Variables
+
+- `BACKGROUND_IMAGE_URL`: S3 URL for background image
+- `USER_NAME`: User name displayed in header
+- `AWS_REGION`: AWS region for S3 access
+- `DBHOST`: MySQL host
+- `DBPORT`: MySQL port
+- `DBUSER`: MySQL username
+- `DBPWD`: MySQL password
+- `DATABASE`: Database name
+
+### ConfigMap Configuration
+
+Update `k8s/configmap.yaml` with your S3 bucket details:
+
+```yaml
+data:
+  BACKGROUND_IMAGE_URL: "s3://your-private-bucket/background.jpg"
+  USER_NAME: "Senindu Mendis"
+  AWS_REGION: "us-east-1"
+```
+
+## 📝 Logging
+
+The application logs:
+- Background image URL on startup
+- User name and database configuration
+- Employee operations (add/retrieve)
+- S3 download operations
+- Error messages
+
+## 🔒 Security Features
+
+- MySQL credentials stored in Kubernetes secrets
+- S3 access via IRSA (IAM Roles for Service Accounts)
+- Input validation and error handling
+- Secure environment variable management
+
+## 🧪 Testing
+
+Run tests locally:
+
+```bash
+pip install pytest
+python -m pytest tests/ -v
+```
+
+## 📊 Monitoring
+
+Check application logs:
+
+```bash
+kubectl logs -f deployment/flask-app-deployment -n final
+```
+
+## 🎯 Key Features Implemented
+
+✅ Background images from S3 instead of solid colors  
+✅ ConfigMap for background image URL and user name  
+✅ S3 image download and local storage  
+✅ Comprehensive logging with background image URL  
+✅ MySQL credentials via Kubernetes secrets  
+✅ User name in HTML header via environment variable  
+✅ Application listening on port 81  
+✅ Docker image with local testing  
+✅ GitHub Actions CI/CD pipeline  
+✅ EKS cluster with 2 worker nodes  
+✅ "final" namespace  
+✅ ConfigMap for application configuration  
+✅ Secret for database credentials  
+✅ 2Gi PVC with gp2 storage class  
+✅ Service account with IRSA permissions  
+✅ RBAC roles and bindings  
+✅ MySQL deployment with PVC  
+✅ LoadBalancer service for external access  
+
+## 👨‍💻 Developer
+
+**Group 3**  
+CLO835 Final - Enhanced Flask Application
+
+Senindu Mendis
+Ashvin Ravi
+Jasleen Dhir
+
+

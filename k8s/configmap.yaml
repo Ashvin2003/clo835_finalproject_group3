@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: final
+data:
+  BACKGROUND_IMAGE_URL: "s3://clo835-final-group3/background.jpg"
+  USER_NAME: "Group 3"
+  AWS_REGION: "us-east-1" 

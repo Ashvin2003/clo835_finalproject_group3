@@ -1,19 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-<center>
-	<font color="DodgerBlue" size="5" style="font-family: avenir">
-		<body style="background: {{ color }};">
-			<h1>The employee {{ name }} wassuccessfully added to the database</h1><br>
-			<h2>The Employee has been added to the database</h2><br>
-			<h2>{{ name }}</h2><br>
-			<title>Add Emp Output</title>
-			<a href="{{ url_for('home') }}">Back</a>
-		</body>
-	</font>
-</center>
+	<title>Employee Added</title>
+	<style>
+		body {
+			background-image: url('{{ background_image }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			font-family: 'Avenir', Arial, sans-serif;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+		}
+		.container {
+			background-color: rgba(0,0,0,0.7);
+			padding: 20px;
+			border-radius: 10px;
+			margin: 20px auto;
+			max-width: 600px;
+		}
+		a {
+			color: #fff;
+			text-decoration: none;
+			font-size: 16px;
+		}
+		a:hover {
+			text-decoration: underline;
+		}
+	</style>
 </head>
 <body>
-
+	<center>
+		<div class="container">
+			<h1 style="color: DodgerBlue">Employee Database by {{ user_name }}</h1>
+			<h2>Employee {{ name }} added successfully!</h2>
+			<br><br>
+			<a href="/">Back to Home</a>
+		</div>
+	</center>
 </body>
 </html>

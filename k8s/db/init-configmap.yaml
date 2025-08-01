@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  namespace: final
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS employees;
+    USE employees;
+    
+    CREATE TABLE IF NOT EXISTS employee (
+        emp_id INT PRIMARY KEY,
+        first_name VARCHAR(50),
+        last_name VARCHAR(50),
+        primary_skill VARCHAR(100),
+        location VARCHAR(100)
+    );
+    
+    INSERT INTO employee VALUES (1, 'John', 'Doe', 'Python', 'Toronto');
+    INSERT INTO employee VALUES (2, 'Jane', 'Smith', 'Java', 'Vancouver');
+    INSERT INTO employee VALUES (3, 'Bob', 'Johnson', 'JavaScript', 'Montreal'); 

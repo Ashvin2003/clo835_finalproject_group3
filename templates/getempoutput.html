@@ -2,34 +2,57 @@
 <html>
 <head>
 	<title>Employee Information</title>
+	<style>
+		body {
+			background-image: url('{{ background_image }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			font-family: 'Avenir', Arial, sans-serif;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+		}
+		.container {
+			background-color: rgba(0,0,0,0.7);
+			padding: 20px;
+			border-radius: 10px;
+			margin: 20px auto;
+			max-width: 600px;
+		}
+		.employee-info {
+			background-color: rgba(255,255,255,0.1);
+			padding: 15px;
+			border-radius: 5px;
+			margin: 10px 0;
+		}
+		a {
+			color: #fff;
+			text-decoration: none;
+			font-size: 16px;
+		}
+		a:hover {
+			text-decoration: underline;
+		}
+	</style>
 </head>
-<center>
-	<font color="black" size="5" style="font-family: avenir">
-
-		<h1 style="color: DodgerBlue">Employee Information</h1>
-
-		<body style="background: {{ color }};">
-
-			<form>
-
-				<div>
-
-			  		Employee ID:<br> {{ id }} <br><br>
-
-			  		First Name:<br> {{ fname }} <br><br>
-
-			  		Last Name:<br> {{ lname }} <br><br>
-
-			  		Primary Interest:<br> {{ interest }} <br><br>
-
-			  		Location:<br> {{ location }} <br><br>
-			  		
-			  	</div>
-
-			</form>
-			<a href="{{ url_for('home') }}">Back</a>
-		</body>
-
-	</font>
-</center>
+<body>
+	<center>
+		<div class="container">
+			<h1 style="color: DodgerBlue">Employee Database by {{ user_name }}</h1>
+			
+			<div class="employee-info">
+				<h2>Employee Information</h2>
+				<p><strong>Employee ID:</strong> {{ id }}</p>
+				<p><strong>First Name:</strong> {{ fname }}</p>
+				<p><strong>Last Name:</strong> {{ lname }}</p>
+				<p><strong>Primary Skills:</strong> {{ interest }}</p>
+				<p><strong>Location:</strong> {{ location }}</p>
+			</div>
+			
+			<br><br>
+			<a href="/">Back to Home</a>
+		</div>
+	</center>
+</body>
 </html>

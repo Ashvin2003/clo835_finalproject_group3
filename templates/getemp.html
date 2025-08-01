@@ -1,27 +1,72 @@
-	<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 	<title>Get Employee Information</title>
+	<style>
+		body {
+			background-image: url('{{ background_image }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			font-family: 'Avenir', Arial, sans-serif;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+		}
+		.container {
+			background-color: rgba(0,0,0,0.7);
+			padding: 20px;
+			border-radius: 10px;
+			margin: 20px auto;
+			max-width: 600px;
+		}
+		input {
+			height: 25px;
+			font-size: 14pt;
+			color: #333;
+			width: 300px;
+			padding: 5px;
+			border-radius: 5px;
+			border: none;
+		}
+		button {
+			background: #007bff;
+			height: 45px;
+			width: 200px;
+			color: white;
+			font-size: 16px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			margin: 10px;
+		}
+		button:hover {
+			background: #0056b3;
+		}
+		a {
+			color: #fff;
+			text-decoration: none;
+			font-size: 16px;
+		}
+		a:hover {
+			text-decoration: underline;
+		}
+	</style>
 </head>
-<center>
-	<font color="black" size="5" style="font-family: avenir">
-
-		<h1 style="color: DodgerBlue">Employee Information</h1>
-
-		<body style="background: {{ color }};">
-
-			<form action="/fetchdata" autocomplete="on" method="POST">
-
-				<h2 style="color: grey">Enter Employee ID</h2>
-
-		  		Employee ID:<br> <input style="height:25px;font-size:14pt;" type="number" name="emp_id" autofocus size="40"><br><br>
-
-
-		  		<button type="submit" style="background: grey; height: 45px; width: 200px; color: white; size: 5; font:oblique;">FETCH INFO</button><br><br>
-
+<body>
+	<center>
+		<div class="container">
+			<h1 style="color: DodgerBlue">Employee Database by {{ user_name }}</h1>
+			
+			<form action="/fetchdata" method="POST">
+				Employee ID:<br> 
+				<input type="number" name="emp_id" autofocus><br><br>
+				<button type="submit">GET EMPLOYEE</button><br><br>
 			</form>
-
-		</body>
-	</font>
-</center>
+			
+			<br><br>
+			<a href="/">Back to Home</a>
+		</div>
+	</center>
+</body>
 </html>

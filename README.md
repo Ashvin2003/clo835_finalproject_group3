@@ -257,7 +257,7 @@ kubectl logs -f deployment/flask-app-deployment -n final
 ✅ MySQL deployment with PVC  
 ✅ LoadBalancer service for external access  
 
-## 👨‍💻 Developer
+## 👨‍💻 Developers
 
 **Group 3**  
 CLO835 Final - Enhanced Flask Application

@@ -1,13 +1,13 @@
-# CLO835 Assignment 2 - Enhanced Flask App with S3 Background Images
+# CLO835 Final - Group 3 - Enhanced Flask App with S3 Background Images
 
 This project is an enhanced Flask web application with MySQL database that supports background images from S3, Kubernetes deployment with IRSA, and CI/CD pipeline.
 
 ## 🚀 Enhanced Features
 
-- **Background Images from S3**: Application retrieves background images from private S3 buckets
-- **ConfigMap Integration**: Background image URL and user name provided via ConfigMap
+- **Background Images from S3**: Application retrieves background images from private S3 bucket
+- **ConfigMap Integration**: Background image URL, user name, aws access keys  provided via ConfigMap
 - **Kubernetes Secrets**: MySQL credentials stored securely as Kubernetes secrets
-- **IRSA Support**: Service account with IAM roles for S3 access
+- **IRSA Support**: Service account with IAM roles
 - **Port 81**: Application listens on port 81 as requested
 - **Comprehensive Logging**: Background image URL and application events logged
 - **Modern UI**: Responsive design with background images instead of solid colors

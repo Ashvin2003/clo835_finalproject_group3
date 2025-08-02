@@ -1,3 +1,6 @@
+Add MySQL ReplicaSet configuration for high availability
+
+
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:

@@ -1,3 +1,5 @@
+# Add webapp ReplicaSet with ECR image and secure MySQL connection
+
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:

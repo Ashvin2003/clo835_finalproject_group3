@@ -1,3 +1,6 @@
+Add MySQL ClusterIP service for internal access
+
+
 apiVersion: v1
 kind: Service
 metadata:

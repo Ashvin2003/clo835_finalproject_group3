@@ -1,4 +1,5 @@
-#this is pod file
+# Add standalone webapp pod with ECR image and secure DB credentials 
+
 apiVersion: v1
 kind: Pod
 metadata:

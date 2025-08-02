@@ -1,3 +1,6 @@
+Add MySQL pod definition with ECR image and root password
+
+
 apiVersion: v1
 kind: Pod
 metadata:

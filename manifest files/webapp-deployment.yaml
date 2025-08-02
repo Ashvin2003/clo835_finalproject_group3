@@ -1,3 +1,5 @@
+Add webapp deployment with ECR image and MySQL backend integration
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
